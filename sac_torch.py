@@ -144,6 +144,7 @@ class Agent():
             state = torch.Tensor([s]).to(self.actor.device)
             action, log_probs = self.actor.sample_normal(state, reparameterize=False)
             action = action.cpu().detach().numpy()[0]
+            
             new_s, r, done, info = env.step(action)
             
             log_probs = log_probs.cpu().detach().numpy()[0]
