@@ -139,26 +139,26 @@ class Agent():
     def generate_session(self, env, t_max=1000):
         states, traj_probs, actions, rewards = [], [],[], []
         s = env.reset()
-        q_t = 1.0
+        q_t = 0
         for t in range(t_max):
             state = torch.Tensor([s]).to(self.actor.device)
             action, log_probs = self.actor.sample_normal(state, reparameterize=False)
             action = action.cpu().detach().numpy()[0]
             new_s, r, done, info = env.step(action)
             
-            probs = torch.exp(log_probs).cpu().detach().numpy()
-            q_t *= probs
-
-            states.append(s)
+            log_probs = log_probs.cpu().detach().numpy()[0]
+            #q_t *= probs
+            q_t += log_probs[0]
+            states.append(s.tolist())
             traj_probs.append(q_t)
-            actions.append(action)
+            actions.append(action[0])
             rewards.append(r)
 
             s = new_s
             if done:
                 break
 
-        return states, traj_probs, actions
+        return np.array(states), np.array(traj_probs), np.array(actions), np.array(rewards)
 
 
 
